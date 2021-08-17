@@ -11,6 +11,8 @@ import (
 	"net/http"
 	"os"
 
+	"brdbth/auth"
+
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -22,16 +24,34 @@ const defaultPort = "8080"
 
 func main() {
 	port := os.Getenv("PORT")
+	tw_co_ke := os.Getenv("TWITTER_CONSUMER_KEY")
+	tw_co_se := os.Getenv("TWITTER_CONSUMER_SECRET")
+	tw_ac_to := os.Getenv("TWITTER_ACCESS_TOKEN")
+	tw_ac_se := os.Getenv("TWITTER_ACCESS_SECRET")
+
+	creds := auth.TwitterCredentials{AccessToken: tw_ac_to, AccessTokenSecret: tw_ac_se, ConsumerKey: tw_co_ke, ConsumerSecret: tw_co_se}
+
+	fmt.Printf("%+v\n", creds)
+
+	client, err := auth.GetClient(&creds)
+
+	if err != nil {
+		log.Println("Error getting twitter client")
+		log.Println(err)
+	}
+
+	fmt.Printf("%+v\n", client)
+
 	if port == "" {
 		port = defaultPort
 	}
 
 	srv := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: &graph.Resolver{}}))
 
-	_, err := GetMongoConnection()
+	_, e := GetMongoConnection()
 
-	if err != nil {
-		log.Fatal(err)
+	if e != nil {
+		log.Fatal(e)
 	}
 
 	http.Handle("/", playground.Handler("GraphQL playground", "/query"))
@@ -39,6 +59,7 @@ func main() {
 
 	log.Printf("connect to http://localhost:%s/ for GraphQL playground", port)
 	log.Fatal(http.ListenAndServe(":"+port, nil))
+
 }
 
 func GetMongoConnection() (*mongo.Client, error) {
