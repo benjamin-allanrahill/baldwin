@@ -6,9 +6,3 @@ type NewTweet struct {
 	Text     string `json:"text"`
 	AuthorID string `json:"author_id"`
 }
-
-type Tweet struct {
-	ID       string `json:"id"`
-	Text     string `json:"text"`
-	AuthorID string `json:"author_id"`
-}

@@ -3,13 +3,12 @@
 # https://gqlgen.com/getting-started/
 
 type Tweet {
-  id: String!
+  createdAt: String!
   text: String!
-  author_id: String!
 }
 
 type Query {
-  tweets: [Tweet!]!
+  AllTweets: [Tweet!]!
 }
 
 input NewTweet {

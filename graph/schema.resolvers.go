@@ -4,26 +4,38 @@ package graph
 // will be copied through when generating and any unknown code will be moved to the end.
 
 import (
+	"brdbth/auth"
 	"brdbth/graph/generated"
 	"brdbth/graph/model"
 	"context"
+
+	api "github.com/dghubble/go-twitter/twitter"
 )
 
-func (r *mutationResolver) CreateTweet(ctx context.Context, input *model.NewTweet) (*model.Tweet, error) {
-
+func (r *mutationResolver) CreateTweet(ctx context.Context, input *model.NewTweet) (*api.Tweet, error) {
 	var tweet model.Tweet
-	tweet.AuthorID = input.AuthorID
+	tweet.CreatedAt = "1232423"
 	tweet.Text = input.Text
-	tweet.ID = "!#@@##"
 	return &tweet, nil
 }
 
-func (r *queryResolver) Tweets(ctx context.Context) ([]*model.Tweet, error) {
-	var tweets []*model.Tweet
+func (r *queryResolver) AllTweets(ctx context.Context) ([]*api.Tweet, error) {
+	client, err := auth.GetClient()
+	if err != nil {
+		return nil, err
+	}
+	tweets, _, err := client.Timelines.HomeTimeline(&api.HomeTimelineParams{})
 
-	dummyTweet := model.Tweet{ID: "sfjahfdshalksdh", Text: "this is my dummy tweet", AuthorID: "@beeejar"}
-	tweets = append(tweets, &dummyTweet)
-	return tweets, nil
+	if err != nil {
+		return nil, err
+	}
+	resp := make([]*api.Tweet, len(tweets))
+
+	for i := range tweets {
+		resp[i] = &tweets[i]
+	}
+
+	return resp, nil
 }
 
 // Mutation returns generated.MutationResolver implementation.
